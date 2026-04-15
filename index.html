@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body {
+font-family: Arial;
+padding: 15px;
+}
+
+h2 {
+text-align: center;
+}
+
+.menuRow {
+
+display: flex;
+justify-content: space-between;
+align-items: center;
+
+margin: 8px 0;
+padding: 6px;
+
+border-bottom: 1px solid #ddd;
+
+}
+
+button {
+
+padding: 8px 12px;
+font-size: 16px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- ===================== -->
+<!-- PILIH MEJA -->
+<!-- ===================== -->
+
+<div id="mejaPage">
+
+<h2>Pilih Nomor Meja</h2>
+
+<select id="meja">
+<option value="">-- Pilih Meja --</option>
+<option value="Meja 1">Meja 1</option>
+<option value="Meja 2">Meja 2</option>
+<option value="Meja 3">Meja 3</option>
+</select>
+
+<br><br>
+
+<button onclick="mulaiPesan()">
+Mulai Pesan
+</button>
+
+</div>
+
+<!-- ===================== -->
+<!-- MENU -->
+<!-- ===================== -->
+
+<div id="menuPage" style="display:none;">
+
+<h2>Pilih Menu</h2>
+
+<div id="menuContainer"></div>
+
+<button onclick="lanjutTelur()">
+Lanjut Pilih Telur
+</button>
+
+</div>
+
+<!-- ===================== -->
+<!-- TELUR PER MENU -->
+<!-- ===================== -->
+
+<div id="telurPage" style="display:none;">
+
+<h2>Pilih Menu yang Pakai Telur</h2>
+
+<div id="telurContainer"></div>
+
+<button onclick="selesaiPesan()">
+Selesai Pesan
+</button>
+
+</div>
+
+<!-- ===================== -->
+<!-- DONE -->
+<!-- ===================== -->
+
+<div id="donePage" style="display:none;">
+
+<h2>Mohon Tunggu Sebentar</h2>
+
+<p>Nomor Pesanan Anda:</p>
+
+<h1 id="nomorPesanan"></h1>
+
+</div>
+
+<script>
+
+// ======================
+// DATA MENU
+// ======================
+
+let menuList = [
+
+{key:"lontong_sayur", nama:"Lontong Sayur", harga:7000},
+{key:"lontong_pical", nama:"Lontong Pical", harga:7000},
+{key:"soto_ayam", nama:"Soto Ayam", harga:12000},
+{key:"soto_daging", nama:"Soto Daging", harga:15000},
+{key:"sop_ayam", nama:"Sop Ayam", harga:12000},
+{key:"sop_daging", nama:"Sop Daging", harga:15000}
+
+];
+
+let pesanan = {};
+let telur = {};
+
+// ======================
+// BUAT MENU OTOMATIS
+// ======================
+
+function renderMenu(){
+
+let html="";
+
+menuList.forEach(item=>{
+
+pesanan[item.key]=0;
+telur[item.key]=0;
+
+html+=`
+
+<div class="menuRow">
+
+${item.nama} (${item.harga/1000}k)
+
+<div>
+
+<button onclick="kurang('${item.key}')">-</button>
+
+<span id="${item.key}Qty">0</span>
+
+<button onclick="tambah('${item.key}')">+</button>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+document.getElementById(
+"menuContainer"
+).innerHTML=html;
+
+}
+
+renderMenu();
+
+// ======================
+// TAMBAH KURANG MENU
+// ======================
+
+function tambah(key){
+
+pesanan[key]++;
+
+document.getElementById(
+key+"Qty"
+).innerText=pesanan[key];
+
+}
+
+function kurang(key){
+
+if(pesanan[key]>0){
+
+pesanan[key]--;
+
+document.getElementById(
+key+"Qty"
+).innerText=pesanan[key];
+
+}
+
+}
+
+// ======================
+// PINDAH HALAMAN
+// ======================
+
+function mulaiPesan(){
+
+let meja=document.getElementById("meja").value;
+
+if(meja==""){
+
+alert("Pilih meja dulu!");
+return;
+
+}
+
+document.getElementById("mejaPage").style.display="none";
+document.getElementById("menuPage").style.display="block";
+
+}
+
+// ======================
+// HALAMAN TELUR
+// ======================
+
+function lanjutTelur(){
+
+document.getElementById("menuPage").style.display="none";
+document.getElementById("telurPage").style.display="block";
+
+let html="";
+
+menuList.forEach(item=>{
+
+if(pesanan[item.key]>0){
+
+html+=`
+
+<div class="menuRow">
+
+${item.nama}
+
+<div>
+
+<button onclick="kurangTelur('${item.key}')">-</button>
+
+<span id="${item.key}Telur">0</span>
+
+<button onclick="tambahTelur('${item.key}')">+</button>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+});
+
+document.getElementById(
+"telurContainer"
+).innerHTML=html;
+
+}
+
+function tambahTelur(key){
+
+if(telur[key]<pesanan[key]){
+
+telur[key]++;
+
+document.getElementById(
+key+"Telur"
+).innerText=telur[key];
+
+}
+
+}
+
+function kurangTelur(key){
+
+if(telur[key]>0){
+
+telur[key]--;
+
+document.getElementById(
+key+"Telur"
+).innerText=telur[key];
+
+}
+
+}
+
+// ======================
+// SELESAI PESAN
+// ======================
+
+function selesaiPesan(){
+
+let nomor=Math.floor(Math.random()*900)+100;
+
+let meja=document.getElementById("meja").value;
+
+let teks="";
+let total=0;
+
+menuList.forEach(item=>{
+
+let qty=pesanan[item.key];
+let telurQty=telur[item.key];
+
+if(qty>0){
+
+if(telurQty>0){
+
+teks+=
+item.nama+
+" + Telur x"+
+telurQty+
+"<br>";
+
+total+=
+(item.harga+2000)*
+telurQty;
+
+}
+
+let tanpaTelur=
+qty-telurQty;
+
+if(tanpaTelur>0){
+
+teks+=
+item.nama+
+" x"+
+tanpaTelur+
+"<br>";
+
+total+=
+item.harga*
+tanpaTelur;
+
+}
+
+}
+
+});
+
+// tampil halaman
+document.getElementById("telurPage").style.display="none";
+document.getElementById("donePage").style.display="block";
+
+document.getElementById(
+"nomorPesanan"
+).innerText=nomor;
+
+// ======================
+// WHATSAPP
+// ======================
+
+let nomorWA="6285760687813"; // ganti nomor dapur
+
+let teksWA=
+
+"Pesanan Baru%0A%0A"+
+"Meja: "+meja+"%0A"+
+"Nomor: "+nomor+"%0A%0A"+
+teks.replace(/<br>/g,"%0A")+
+"%0ATotal Rp "+total;
+
+let linkWA=
+
+"https://wa.me/"+
+nomorWA+
+"?text="+
+teksWA;
+
+window.open(linkWA,"_blank");
+
+}
+
+</script>
+
+</body>
+</html>
